@@ -1,0 +1,26 @@
+_____________________________________________________________
+|  ____________________           ____________________      |
+| |    Authentication   |         |     User Panel     |     |
+| |---------------------|         |--------------------|     |
+| | Username:           |         | Welcome, [username] |     |
+| | [     ]             |         |--------------------|     |
+| | Password:           |         | Accounts:           |     |
+| | [     ]             |         | - Savings           |     |
+| |                     |         | - Checking          |     |
+| | [ Login ] [ Sign Up]|         | - Credit Card       |     |
+| |_____________________|         |____________________|     |
+|                                                             |
+|            Transfer Funds                                   |
+|            ---------------                                  |
+|            [ From: Checking Account ]                        |
+|            [ To: Savings Account ]                           |
+|            [ Amount: $500 ]                                  |
+|            [ Transfer ]                                      |
+|                                                             |
+|           Open New Bank Account                             |
+|           --------------------                             |
+|           [ Account Type: ] [ Savings ]                      |
+|           [ Initial Deposit: $500 ]                          |
+|           [ Open Account ]                                   |
+|_____________________________________________________________|
+
