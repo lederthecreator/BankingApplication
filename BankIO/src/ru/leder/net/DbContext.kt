@@ -6,9 +6,8 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.leder.net.entities.BankAccounts
+import ru.leder.net.entities.Transactions
 import ru.leder.net.entities.Users
-import ru.leder.net.operations.BankAccountOperations
-import ru.leder.net.operations.UserOperations
 
 class DbContext {
 
@@ -30,10 +29,7 @@ class DbContext {
             transaction {
                 addLogger(StdOutSqlLogger)
 
-                SchemaUtils.create(Users, BankAccounts)
-
-                println(UserOperations.getAllQuery())
-                println(BankAccountOperations.getAllQuery())
+                SchemaUtils.create(Users, BankAccounts, Transactions)
             }
 
             return true

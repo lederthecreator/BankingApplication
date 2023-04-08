@@ -18,6 +18,7 @@ class Client(
     private val communicator: Communicator
     private val mainCoroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private val gson = Gson()
+    // private val mainWindow = MainWindow { sendRequest(it) }
 
     private var loggedUser: UserSimplified? = null
     init {
@@ -27,6 +28,7 @@ class Client(
 
     fun start () = mainCoroutineScope.launch {
         launch {
+           //  mainWindow.isVisible = true
             communicator.startReceiving { parseJsonResponse(it) }
         }
 
@@ -41,12 +43,16 @@ class Client(
                     continue
                 }
 
-                val request = parseInputString(input)
-                val jsonRequest = gson.toJson(request)
-
-                communicator.sendData(jsonRequest)
+                sendRequest(input)
             }
         }
+    }
+
+    private fun sendRequest(input: String) {
+        val request = parseInputString(input)
+        val jsonRequest = gson.toJson(request)
+
+        communicator.sendData(jsonRequest)
     }
 
     private fun parseInputString(input: String) : Request? {
@@ -149,6 +155,8 @@ class Client(
                 val user = gson.fromJson(data, UserSimplified::class.java)
                 loggedUser = user
                 println("Hello, ${user.name}!")
+
+                // mainWindow.loginDtoReceiver(LoginDTO(user.name))
             }
 
             "SIGNUP" -> {

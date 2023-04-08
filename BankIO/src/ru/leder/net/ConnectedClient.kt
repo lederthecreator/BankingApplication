@@ -54,6 +54,11 @@ class ConnectedClient(
 
         when (request["operation"]) {
             "LOGIN" -> {
+                if (loggedUser != null) {
+                    sendErrorResponse("LOGIN", "You already logged in")
+                    return
+                }
+
                 val loginService = LoginService(logger)
                 val loginData = request["data"]
 

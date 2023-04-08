@@ -1,0 +1,269 @@
+JFDML JFormDesigner: "8.0.3.0.246" Java: "17.0.5" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+			"$columnCount": 1
+			"$rowCount": 5
+			"hGap": 10
+			"vGap": 5
+		} ) {
+			name: "this"
+			"defaultCloseOperation": 3
+			"title": "Bank"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 4
+				"$rowCount": 3
+				"hGap": 10
+				"vGap": 5
+			} ) {
+				name: "panel1"
+				"border": new javax.swing.border.TitledBorder( "Login / Sign Up" )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label1"
+					"text": "Login:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "textField1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"colSpan": 2
+					"fill": 1
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label2"
+					"text": "Password:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 1
+				} )
+				add( new FormComponent( "javax.swing.JPasswordField" ) {
+					name: "passwordField1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 1
+					"colSpan": 2
+					"fill": 1
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "button1"
+					"text": "Sign Up"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "SignUpButtonHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 2
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "button2"
+					"text": "Login"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "LogInButtonHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+					"row": 2
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"fill": 1
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 4
+				"$rowCount": 3
+				"hGap": 10
+				"vGap": 5
+			} ) {
+				name: "panel4"
+				"border": new javax.swing.border.TitledBorder( "User account information" )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label8"
+					"font": new com.jformdesigner.model.SwingDerivedFont( null, 1, 0, false )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label9"
+					"text": "Name: "
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"rowSpan": 2
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "userNameTextField"
+					"editable": false
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"fill": 1
+					"colSpan": 2
+					"rowSpan": 2
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label10"
+					"text": "Bank Accounts:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 2
+				} )
+				add( new FormComponent( "javax.swing.JComboBox" ) {
+					name: "comboBox3"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "bankAccountsComboBoxHandler", true ) )
+					addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "userBankAccountValueChangedHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 2
+					"fill": 1
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label11"
+					"text": "Amount"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+					"row": 2
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 1
+				"fill": 1
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 4
+				"$rowCount": 5
+				"hGap": 10
+				"vGap": 5
+			} ) {
+				name: "panel2"
+				"border": new javax.swing.border.TitledBorder( "Transfer Operation" )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label3"
+					"text": "Transfer Type:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+				} )
+				add( new FormComponent( "javax.swing.JComboBox" ) {
+					name: "comboBox1"
+					"model": new javax.swing.DefaultComboBoxModel {
+						selectedItem: "Deposit"
+						addElement( "Deposit" )
+						addElement( "Withdraw" )
+						addElement( "Transfer" )
+					}
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "transferTypeComboBoxHandler", true ) )
+					addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "transferTypeValueChangedHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label4"
+					"text": "Amount:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 1
+					"column": 1
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "textField3"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+					"row": 1
+					"fill": 1
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label5"
+					"text": "Recipient Login:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 2
+					"column": 1
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "textField4"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+					"row": 2
+					"fill": 1
+					"useParentLayout": true
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "button4"
+					"text": "Check"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "checkLoginButtonHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 3
+					"row": 2
+					"fill": 3
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label6"
+					"text": "Recipient Bank Account Number: "
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 3
+					"column": 1
+				} )
+				add( new FormComponent( "javax.swing.JComboBox" ) {
+					name: "comboBox2"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "recipientBankAccountsComboBoxHandler", true ) )
+					addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "recipientBankAccountValueChangedHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 2
+					"row": 3
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "button3"
+					"text": "Transfer"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "TransferButtonHandler", true ) )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 3
+					"row": 3
+				} )
+				add( new FormComponent( "com.jformdesigner.designer.wrapper.VSpacer" ) {
+					name: "vSpacer2"
+					auxiliary() {
+						"JavaCodeGenerator.variableLocal": true
+					}
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 4
+					"column": 1
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 2
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 1
+				"$rowCount": 1
+				"hGap": 10
+				"vGap": 5
+			} ) {
+				name: "panel3"
+				"border": new javax.swing.border.TitledBorder( "Transaction History" )
+				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+					name: "scrollPane1"
+					add( new FormComponent( "javax.swing.JList" ) {
+						name: "list1"
+						"selectionMode": 0
+						"model": new javax.swing.DefaultListModel {
+							addElement( "1" )
+							addElement( "2" )
+							addElement( "3" )
+							addElement( "4" )
+							addElement( "5" )
+							addElement( "6" )
+							addElement( "7" )
+							addElement( "8" )
+							addElement( "9" )
+							addElement( "10" )
+						}
+						"visibleRowCount": 3
+						addEvent( new FormEvent( "javax.swing.event.ListSelectionListener", "valueChanged", "transactionHistoryHandler", true ) )
+					} )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"fill": 1
+					"vSizePolicy": 0
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 3
+				"fill": 1
+			} )
+			add( new FormComponent( "com.jformdesigner.designer.wrapper.VSpacer" ) {
+				name: "vSpacer1"
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 4
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 450, 566 )
+		} )
+	}
+}

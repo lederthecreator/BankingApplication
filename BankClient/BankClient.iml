@@ -11,5 +11,6 @@
     <orderEntry type="library" exported="" name="jetbrains.kotlinx.serialization.json.jvm" level="project" />
     <orderEntry type="module" module-name="BankIO" exported="" />
     <orderEntry type="library" exported="" name="google.code.gson" level="project" />
+    <orderEntry type="library" name="IntelliJ IDEA GridLayout" level="project" />
   </component>
 </module>

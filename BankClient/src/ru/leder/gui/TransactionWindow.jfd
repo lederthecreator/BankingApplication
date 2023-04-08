@@ -1,0 +1,106 @@
+JFDML JFormDesigner: "8.0.3.0.246" Java: "17.0.5" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"defaultCloseOperation": 2
+			"minimumSize": new java.awt.Dimension( 320, 430 )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "dialogPane"
+				"border": new javax.swing.border.EmptyBorder( 12, 12, 12, 12 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 1
+					"$rowCount": 4
+					"hGap": 10
+					"vGap": 10
+				} ) {
+					name: "contentPanel"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "panel1"
+						"border": new javax.swing.border.TitledBorder( "Time" )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label1"
+							"text": "text"
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"fill": 3
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "panel2"
+						"border": new javax.swing.border.TitledBorder( "Recipient" )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label2"
+							"text": "text"
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 1
+						"fill": 3
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "panel3"
+						"border": new javax.swing.border.TitledBorder( "Recipient bank account" )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label3"
+							"text": "text"
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 2
+						"fill": 3
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "panel4"
+						"border": new javax.swing.border.TitledBorder( "Amount" )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label4"
+							"text": "text"
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 3
+						"fill": 3
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+					"$columnSpecs": "0:1.0, 80"
+					"$rowSpecs": "0"
+					"$hGap": 5
+					"$vGap": 5
+				} ) {
+					name: "buttonBar"
+					"border": new javax.swing.border.EmptyBorder( 12, 0, 0, 0 )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "okButton"
+						"text": "OK"
+						"focusPainted": false
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "okButtonHandler", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+						"gridy": 0
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}

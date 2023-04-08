@@ -1,0 +1,128 @@
+JFDML JFormDesigner: "8.0.3.0.246" Java: "17.0.5" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"defaultCloseOperation": 2
+			"minimumSize": new java.awt.Dimension( 500, 300 )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "dialogPane"
+				"border": new javax.swing.border.TitledBorder( "Sign up" )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 7
+					"$rowCount": 3
+					"hGap": 10
+					"vGap": 5
+				} ) {
+					name: "contentPanel"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label1"
+						"text": "Name"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"hSizePolicy": 0
+						"column": 1
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField1"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"column": 2
+						"colSpan": 4
+						"fill": 1
+					} )
+					add( new FormComponent( "com.jformdesigner.designer.wrapper.HSpacer" ) {
+						name: "hSpacer2"
+						auxiliary() {
+							"JavaCodeGenerator.variableLocal": true
+						}
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 1
+						"hSizePolicy": 0
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label2"
+						"text": "Login"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 1
+						"hSizePolicy": 0
+						"column": 1
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField2"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"column": 2
+						"row": 1
+						"colSpan": 4
+						"fill": 1
+					} )
+					add( new FormComponent( "com.jformdesigner.designer.wrapper.HSpacer" ) {
+						name: "hSpacer1"
+						auxiliary() {
+							"JavaCodeGenerator.variableLocal": true
+						}
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"column": 6
+						"row": 1
+						"hSizePolicy": 0
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label3"
+						"text": "Password"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 2
+						"hSizePolicy": 0
+						"column": 1
+					} )
+					add( new FormComponent( "javax.swing.JPasswordField" ) {
+						name: "passwordField1"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"column": 2
+						"row": 2
+						"colSpan": 4
+						"fill": 1
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+					"$columnSpecs": "0:1.0, 80, 80"
+					"$rowSpecs": "0, 0, 0"
+					"$hGap": 5
+					"$vGap": 5
+				} ) {
+					name: "buttonBar"
+					"border": new javax.swing.border.EmptyBorder( 12, 0, 0, 0 )
+					add( new FormComponent( "com.jformdesigner.designer.wrapper.VSpacer" ) {
+						name: "vSpacer1"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridheight": 2
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "okButton"
+						"text": "OK"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "okButtonHandler", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+						"gridy": 2
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "cancelButton"
+						"text": "Cancel"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "cancelButtonHandler", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 2
+						"gridy": 2
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "South"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}

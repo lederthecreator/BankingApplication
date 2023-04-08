@@ -14,10 +14,6 @@ class Communicator (val socket: Socket) {
             while (isActive)
             {
                 val data = br.readLine()
-                if (data.isNotEmpty())
-                {
-                    val a = 2 + 2
-                }
                 dataAnalyser(data)
             }
         }
