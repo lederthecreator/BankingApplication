@@ -6,12 +6,18 @@ package ru.leder.gui
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.uiDesigner.core.Spacer
-import ru.leder.net.DTO.SignUpDTO
+import ru.leder.net.dto.BankAccountDto
+import ru.leder.net.dto.SignUpDto
+import ru.leder.net.dto.UserDto
+import ru.leder.net.entities.BankAccountSimplified
+import ru.leder.net.entities.TransactionSimplified
 import java.awt.Color
 import java.awt.Font
 import java.awt.Insets
 import java.awt.event.ActionEvent
 import java.awt.event.ItemEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.beans.PropertyChangeListener
 import javax.swing.*
 import javax.swing.border.CompoundBorder
@@ -23,42 +29,133 @@ import javax.swing.event.ListSelectionEvent
  * @author User
  */
 class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
-    fun signUpDtoReceiver(dto: SignUpDTO?) {
-        if (dto == null) {
-            val errorWindow = ErrorWindow()
-            errorWindow.textArea1?.text = "Empty signup dto."
-            errorWindow.isVisible = true
 
-            return
+    private val accountsRequestString = "GETBANKACCOUNTS"
+    private var userId: Int = 0
+
+    fun checkUserBankAccountsReceiver(accounts: List<BankAccountSimplified>) {
+        val recipientCombo = recipientBankAccountsCombo!!
+
+        recipientCombo.removeAllItems()
+        accounts.forEach {
+            recipientCombo.addItem(it)
+        }
+    }
+
+    fun transactionsReceiver(query: List<TransactionSimplified>) {
+        val listModel = DefaultListModel<TransactionSimplified>()
+        query.forEach {
+            listModel.addElement(it)
         }
 
-        if (userNameTextField == null || comboBox3 == null) {
-            return
+        transactionList!!.apply {
+            removeAll()
+            model = listModel
+            repaint()
         }
+    }
 
+    fun transferReceiver() {
+        sendRequest(accountsRequestString)
+    }
+
+    fun bankAccountReceiver(dto: BankAccountDto) {
+        val bankAccountWindow = BankAccountWindow(dto)
+        bankAccountWindow.isVisible = true
+    }
+
+    fun bankAccountListReceiver(accounts: List<BankAccountSimplified>) {
+        val bankCombo = userBankAccountCombo!!
+
+        bankCombo.removeAllItems()
+        accounts.forEach {
+            bankCombo.addItem(it)
+        }
+    }
+
+    fun userDtoReceiver(dto: UserDto) {
+        this.title = "Добро пожаловать, ${dto.name}"
+
+        textField1!!.text = dto.login
         userNameTextField!!.text = dto.name
-        comboBox3!!.removeAllItems()
-        comboBox3!!.model = DefaultComboBoxModel(dto.bankAccountList.toTypedArray())
+        userId = dto.id
+
+        passwordField1!!.isEnabled = false
+        button1!!.isEnabled = false
+        button2!!.isEnabled = false
+    }
+
+    private fun signUpDtoReceiver(dto: SignUpDto) {
+        val signUpRequestString = "SIGNUP ${dto.name}|${dto.login}|${dto.password}"
+
+        sendRequest(signUpRequestString)
+        sendRequest(accountsRequestString)
     }
 
     private fun signUpButtonHandler(e: ActionEvent) {
-        val signUpWindow = SignUpWindow { signUpDtoReceiver(it) };
+        val signUpWindow = SignUpWindow { signUpDtoReceiver(it) }
+
+        signUpWindow.isVisible = true
     }
 
     private fun logInButtonHandler(e: ActionEvent) {
-        // TODO add your code here
+        val login = textField1!!.text
+        val password = String(passwordField1!!.password)
+
+        if (login.isNullOrEmpty()) {
+            showErrorWindow("Логин не может быть пустой")
+            return
+        }
+
+        val loginRequestString = "LOGIN ${login}|${password}"
+        sendRequest(loginRequestString)
+        sendRequest(accountsRequestString)
     }
 
     private fun bankAccountsComboBoxHandler(e: ActionEvent) {
-        // TODO add your code here
+        val selectedItem = userBankAccountCombo!!.selectedItem ?: return
+        val bankAccount = selectedItem as BankAccountSimplified
+        val id = bankAccount.id
+
+        val transactionsString = "GETTRANSACTIONS ${id}"
+        sendRequest(transactionsString)
+    }
+
+    private fun bankAccountsComboBoxItemClickHandler(e: MouseEvent?) {
+        if (e?.clickCount == 1) {
+            val selectedItem = userBankAccountCombo!!.selectedItem ?: return
+            val bankAccount = selectedItem as BankAccountSimplified
+            val id = bankAccount.id
+
+            val requestString = "GETBANKACCOUNT $id"
+            sendRequest(requestString)
+        }
     }
 
     private fun transferTypeComboBoxHandler(e: ActionEvent) {
-        // TODO add your code here
+        val selectedValue = transferComboBox!!.selectedItem
+
+        when (selectedValue) {
+            "Withdraw", "Deposit" -> {
+                recipientBankAccountsCombo!!.isEnabled = false
+                recipientLoginTextField!!.isEnabled = false
+
+                checkRecipientLoginButton!!.isEnabled = false
+            }
+            "Transfer" -> {
+                recipientBankAccountsCombo!!.isEnabled = true
+                recipientLoginTextField!!.isEnabled = true
+
+                checkRecipientLoginButton!!.isEnabled = true
+            }
+        }
     }
 
     private fun checkLoginButtonHandler(e: ActionEvent) {
-        // TODO add your code here
+        val userLogin = recipientLoginTextField!!.text
+
+        val getAccountsByLoginString = "GETBANKACCOUNTSBYLOGIN ${userLogin}"
+        sendRequest(getAccountsByLoginString)
     }
 
     private fun recipientBankAccountsComboBoxHandler(e: ActionEvent) {
@@ -66,7 +163,24 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
     }
 
     private fun transferButtonHandler(e: ActionEvent) {
-        // TODO add your code here
+        val userBankAccountSelected = userBankAccountCombo?.selectedItem ?: return
+        val userBankAccount = userBankAccountSelected as BankAccountSimplified
+        val amount = amountTextField!!.text.toBigDecimal()
+
+        if (transferComboBox!!.selectedItem != "Transfer") {
+            val transferString = "TRANSFER ${userId}|${userBankAccount.number}|${userId}|${userBankAccount.number}|${amount}|${transferComboBox!!.selectedItem}"
+            println(transferString)
+            sendRequest(transferString)
+        } else {
+            val recipientBankAccountSelected = recipientBankAccountsCombo!!.selectedItem ?: return
+            val recipientBankAccount = recipientBankAccountSelected as BankAccountSimplified
+
+            val transferString = "TRANSFER ${userId}|${userBankAccount.number}|${recipientLoginTextField!!.text}|${recipientBankAccount.number}|${amount}|${transferComboBox!!.selectedItem}"
+            println(transferString)
+            sendRequest(transferString)
+            val checkString = "GETBANKACCOUNTSBYLOGIN ${recipientLoginTextField!!.text}"
+            sendRequest(checkString)
+        }
     }
 
     private fun transactionHistoryHandler(e: ListSelectionEvent) {
@@ -85,8 +199,9 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
         // TODO add your code here
     }
 
-    private fun signUpCallback(name: String, login: String, password: String) {
-        sendRequest("SIGNUP $name|$login|$password")
+    private fun showErrorWindow(message: String) {
+        val errorWindow = ErrorWindow(message)
+        errorWindow.isVisible = true
     }
 
     private fun initComponents() {
@@ -104,23 +219,23 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
         label9 = JLabel()
         userNameTextField = JTextField()
         label10 = JLabel()
-        comboBox3 = JComboBox<Any?>()
+        userBankAccountCombo = JComboBox<BankAccountSimplified>()
         label11 = JLabel()
         panel2 = JPanel()
         label3 = JLabel()
-        comboBox1 = JComboBox()
+        transferComboBox = JComboBox()
         label4 = JLabel()
-        textField3 = JTextField()
+        amountTextField = JTextField()
         label5 = JLabel()
-        textField4 = JTextField()
-        button4 = JButton()
+        recipientLoginTextField = JTextField()
+        checkRecipientLoginButton = JButton()
         label6 = JLabel()
-        comboBox2 = JComboBox<Any?>()
-        button3 = JButton()
+        recipientBankAccountsCombo = JComboBox<BankAccountSimplified>()
+        transferButton = JButton()
         val vSpacer2 = Spacer()
         panel3 = JPanel()
         scrollPane1 = JScrollPane()
-        list1 = JList()
+        transactionList = JList()
         val vSpacer1 = Spacer()
 
         //======== this ========
@@ -279,10 +394,16 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
             )
 
             //---- comboBox3 ----
-            comboBox3!!.addActionListener({ e: ActionEvent -> bankAccountsComboBoxHandler(e) })
-            comboBox3!!.addItemListener({ e: ItemEvent -> userBankAccountValueChangedHandler(e) })
+            userBankAccountCombo!!.addActionListener({ e: ActionEvent -> bankAccountsComboBoxHandler(e) })
+            userBankAccountCombo!!.addItemListener({ e: ItemEvent -> userBankAccountValueChangedHandler(e) })
+            userBankAccountCombo!!.addMouseListener (object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent?) {
+                    bankAccountsComboBoxItemClickHandler(e)
+                }
+            })
+
             panel4!!.add(
-                comboBox3, GridConstraints(
+                userBankAccountCombo, GridConstraints(
                     2, 1, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -331,17 +452,17 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
             )
 
             //---- comboBox1 ----
-            comboBox1!!.model = DefaultComboBoxModel(
+            transferComboBox!!.model = DefaultComboBoxModel(
                 arrayOf(
                     "Deposit",
                     "Withdraw",
                     "Transfer"
                 )
             )
-            comboBox1!!.addActionListener({ e: ActionEvent -> transferTypeComboBoxHandler(e) })
-            comboBox1!!.addItemListener({ e: ItemEvent -> transferTypeValueChangedHandler(e) })
+            transferComboBox!!.addActionListener({ e: ActionEvent -> transferTypeComboBoxHandler(e) })
+            transferComboBox!!.addItemListener({ e: ItemEvent -> transferTypeValueChangedHandler(e) })
             panel2!!.add(
-                comboBox1, GridConstraints(
+                transferComboBox, GridConstraints(
                     0, 2, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -362,7 +483,7 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
                 )
             )
             panel2!!.add(
-                textField3, GridConstraints(
+                amountTextField, GridConstraints(
                     1, 2, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -382,8 +503,9 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
                     null, null, null
                 )
             )
+            recipientLoginTextField!!.isEnabled = false
             panel2!!.add(
-                textField4, GridConstraints(
+                recipientLoginTextField, GridConstraints(
                     2, 2, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -393,10 +515,11 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
             )
 
             //---- button4 ----
-            button4!!.text = "Check"
-            button4!!.addActionListener({ e: ActionEvent -> checkLoginButtonHandler(e) })
+            checkRecipientLoginButton!!.text = "Check"
+            checkRecipientLoginButton!!.isEnabled = false
+            checkRecipientLoginButton!!.addActionListener({ e: ActionEvent -> checkLoginButtonHandler(e) })
             panel2!!.add(
-                button4, GridConstraints(
+                checkRecipientLoginButton, GridConstraints(
                     2, 3, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -418,10 +541,11 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
             )
 
             //---- comboBox2 ----
-            comboBox2!!.addActionListener({ e: ActionEvent -> recipientBankAccountsComboBoxHandler(e) })
-            comboBox2!!.addItemListener({ e: ItemEvent -> recipientBankAccountValueChangedHandler(e) })
+            recipientBankAccountsCombo!!.addActionListener({ e: ActionEvent -> recipientBankAccountsComboBoxHandler(e) })
+            recipientBankAccountsCombo!!.addItemListener({ e: ItemEvent -> recipientBankAccountValueChangedHandler(e) })
+            recipientBankAccountsCombo!!.isEnabled = false
             panel2!!.add(
-                comboBox2, GridConstraints(
+                recipientBankAccountsCombo, GridConstraints(
                     3, 2, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -431,10 +555,10 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
             )
 
             //---- button3 ----
-            button3!!.text = "Transfer"
-            button3!!.addActionListener({ e: ActionEvent -> transferButtonHandler(e) })
+            transferButton!!.text = "Transfer"
+            transferButton!!.addActionListener({ e: ActionEvent -> transferButtonHandler(e) })
             panel2!!.add(
-                button3, GridConstraints(
+                transferButton, GridConstraints(
                     3, 3, 1, 1,
                     GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
                     GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -472,32 +596,11 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
 
 
                 //---- list1 ----
-                list1!!.selectionMode = ListSelectionModel.SINGLE_SELECTION
-                list1!!.model = object : AbstractListModel<String?>() {
-                    var values: Array<String> = arrayOf(
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                        "10"
-                    )
-
-                    override fun getSize(): Int {
-                        return values.size
-                    }
-
-                    override fun getElementAt(i: Int): String {
-                        return values.get(i)
-                    }
-                }
-                list1!!.visibleRowCount = 3
-                list1!!.addListSelectionListener({ e: ListSelectionEvent -> transactionHistoryHandler(e) })
-                scrollPane1!!.setViewportView(list1)
+                transactionList!!.selectionMode = ListSelectionModel.SINGLE_SELECTION
+                transactionList!!.model = DefaultListModel()
+                transactionList!!.visibleRowCount = 3
+                transactionList!!.addListSelectionListener({ e: ListSelectionEvent -> transactionHistoryHandler(e) })
+                scrollPane1!!.setViewportView(transactionList)
             }
             panel3!!.add(
                 scrollPane1, GridConstraints(
@@ -546,22 +649,22 @@ class MainWindow(private val sendRequest: (String) -> Unit) : JFrame() {
     private var label9: JLabel? = null
     private var userNameTextField: JTextField? = null
     private var label10: JLabel? = null
-    private var comboBox3: JComboBox<*>? = null
+    private var userBankAccountCombo: JComboBox<BankAccountSimplified>? = null
     private var label11: JLabel? = null
     private var panel2: JPanel? = null
     private var label3: JLabel? = null
-    private var comboBox1: JComboBox<String>? = null
+    private var transferComboBox: JComboBox<String>? = null
     private var label4: JLabel? = null
-    private var textField3: JTextField? = null
+    private var amountTextField: JTextField? = null
     private var label5: JLabel? = null
-    private var textField4: JTextField? = null
-    private var button4: JButton? = null
+    private var recipientLoginTextField: JTextField? = null
+    private var checkRecipientLoginButton: JButton? = null
     private var label6: JLabel? = null
-    private var comboBox2: JComboBox<*>? = null
-    private var button3: JButton? = null
+    private var recipientBankAccountsCombo: JComboBox<BankAccountSimplified>? = null
+    private var transferButton: JButton? = null
     private var panel3: JPanel? = null
     private var scrollPane1: JScrollPane? = null
-    private var list1: JList<String>? =
+    private var transactionList: JList<TransactionSimplified>? =
         null // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
     init {

@@ -3,8 +3,16 @@ package ru.leder.net
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import ru.leder.gui.ErrorWindow
+import ru.leder.gui.MainWindow
+import ru.leder.net.dto.BankAccountDto
+import ru.leder.net.dto.UserDto
 import ru.leder.net.entities.BankAccountSimplified
+import ru.leder.net.entities.TransactionSimplified
 import ru.leder.net.entities.UserSimplified
 import ru.leder.net.request.Request
 import ru.leder.net.utils.Utils
@@ -18,33 +26,35 @@ class Client(
     private val communicator: Communicator
     private val mainCoroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private val gson = Gson()
-    // private val mainWindow = MainWindow { sendRequest(it) }
+    private val mainWindow : MainWindow
 
     private var loggedUser: UserSimplified? = null
     init {
         socket = Socket(host, port)
         communicator = Communicator(socket)
+        mainWindow = MainWindow { sendRequest(it) }
     }
 
     fun start () = mainCoroutineScope.launch {
         launch {
-           //  mainWindow.isVisible = true
             communicator.startReceiving { parseJsonResponse(it) }
         }
 
         launch {
-            while(isActive)
-            {
-                println("Enter operation and values in format 'OPERATION value1|value2|...'")
-                val input = readlnOrNull() ?: ""
+//            while(isActive)
+//            {
+//                println("Enter operation and values in format 'OPERATION value1|value2|...'")
+//                val input = readlnOrNull() ?: ""
+//
+//                if (input.isEmpty()) {
+//                    println("Invalid input")
+//                    continue
+//                }
+//
+//                sendRequest(input)
+//            }
 
-                if (input.isEmpty()) {
-                    println("Invalid input")
-                    continue
-                }
-
-                sendRequest(input)
-            }
+            mainWindow.isVisible = true
         }
     }
 
@@ -121,11 +131,41 @@ class Client(
                 return Request(
                     operation = operation,
                     data = object {
-                        val initiator = loggedUser?.id ?: 0
-                        val initiatorBankAccount = parsedArgs[0]
-                        val recipient = parsedArgs[1].toInt()
-                        val recipientBankAccount = parsedArgs[2]
-                        val amount = parsedArgs[3].toBigDecimal()
+                        val initiator = parsedArgs[0]
+                        val initiatorBankAccount = parsedArgs[1]
+                        val recipient = parsedArgs[2]
+                        val recipientBankAccount = parsedArgs[3]
+                        val amount = parsedArgs[4].toBigDecimal()
+                        val type = parsedArgs[5]
+                    }
+                )
+            }
+
+            "GETBANKACCOUNT" -> {
+                val id = parsedArgs[0].toInt()
+
+                return Request(
+                    operation = operation,
+                    data = object {
+                        val id = id
+                    }
+                )
+            }
+
+            "GETTRANSACTIONS" -> {
+                return Request(
+                    operation = operation,
+                    data = object {
+                        val bankAccountId = parsedArgs[0]
+                    }
+                )
+            }
+
+            "GETBANKACCOUNTSBYLOGIN" -> {
+                return Request(
+                    operation = operation,
+                    data = object {
+                        val userLogin = parsedArgs[0]
                     }
                 )
             }
@@ -143,26 +183,32 @@ class Client(
 
         if (!success) {
             if (operation == "LOG") {
-                println(data)
+                val errorWindow = ErrorWindow(data)
+                errorWindow.isVisible = true
+                // println(data)
                 return
             }
-            println(data)
+
+            // println(data)
+            // val errorWindow = ErrorWindow(data)
+            // errorWindow.isVisible = true
+
             return
         }
 
         when (operation) {
-            "LOGIN" -> {
+            "LOGIN", "SIGNUP" -> {
                 val user = gson.fromJson(data, UserSimplified::class.java)
                 loggedUser = user
-                println("Hello, ${user.name}!")
+                //println("Hello, ${user.name}!")
 
-                // mainWindow.loginDtoReceiver(LoginDTO(user.name))
-            }
+                val dto = UserDto (
+                    name = user.name,
+                    login = user.login,
+                    id = user.id
+                )
 
-            "SIGNUP" -> {
-                val user = gson.fromJson(data, UserSimplified::class.java)
-                loggedUser = user
-                println("Successfully signed up! Welcome, ${user.name}!")
+                mainWindow.userDtoReceiver(dto)
             }
 
             "LOGOUT" -> {
@@ -175,20 +221,47 @@ class Client(
                 val typeToken = object : TypeToken<List<BankAccountSimplified>>() {}.type
                 val accountList = gson.fromJson<List<BankAccountSimplified>>(data, typeToken)
 
+                /*
                 if (accountList.isEmpty()) {
-                    println("Cannot find any user's bank account")
-                    return
+                println("Cannot find any user's bank account")
+                return
                 }
 
                 accountList.forEach {
-                    println("Bank account list for user ${loggedUser!!.name}") // Т.к. если loggedUser == null => success == false
-                    println(it)
+                println("Bank account list for user ${loggedUser!!.name}") // Т.к. если loggedUser == null => success == false
+                println(it)
                 }
+                */
+
+                mainWindow.bankAccountListReceiver(accountList)
             }
 
             "CREATEBANKACCOUNT" -> {
                 val bankAccount = gson.fromJson(data, BankAccountSimplified::class.java)
                 println("Successfully created bank account with number: ${bankAccount.number}")
+            }
+
+            "GETBANKACCOUNT" -> {
+                val dto = gson.fromJson(data, BankAccountDto::class.java)
+                mainWindow.bankAccountReceiver(dto)
+            }
+
+            "TRANSFER" -> {
+                mainWindow.transferReceiver()
+            }
+
+            "GETTRANSACTIONS" -> {
+                val typeToken = object : TypeToken<List<TransactionSimplified>>() {}.type
+                val query = gson.fromJson<List<TransactionSimplified>>(data, typeToken)
+
+                mainWindow.transactionsReceiver(query)
+            }
+
+            "GETBANKACCOUNTSBYLOGIN" -> {
+                val typeToken = object : TypeToken<List<BankAccountSimplified>>() {}.type
+                val accountList = gson.fromJson<List<BankAccountSimplified>>(data, typeToken)
+
+                mainWindow.checkUserBankAccountsReceiver(accountList)
             }
         }
     }

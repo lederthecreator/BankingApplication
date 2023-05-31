@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.leder.net.entities.BankAccounts
+import ru.leder.net.entities.Products
 import ru.leder.net.entities.Transactions
 import ru.leder.net.entities.Users
 
@@ -29,7 +30,8 @@ class DbContext {
             transaction {
                 addLogger(StdOutSqlLogger)
 
-                SchemaUtils.create(Users, BankAccounts, Transactions)
+                SchemaUtils.create(Users, BankAccounts, Transactions, Products)
+                SchemaUtils.createMissingTablesAndColumns(Users, BankAccounts, Transactions, Products)
             }
 
             return true

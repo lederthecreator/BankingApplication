@@ -8,7 +8,6 @@ import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.math.BigDecimal
-import java.time.LocalDateTime
 
 object Transactions : IntIdTable() {
     val transactionCreateDate = datetime("object_create_date").defaultExpression(CurrentDateTime)
@@ -33,12 +32,11 @@ class Transaction(id: EntityID<Int>) : IntEntity(id) {
 }
 
 data class TransactionSimplified(
-    val transactionCreateDate: LocalDateTime,
+    val transactionCreateDate: String,
     val recipientLogin: String,
-    val recipientBankAccount: String,
     val amount: BigDecimal
 ) {
     override fun toString(): String {
-        return "[$transactionCreateDate] $recipientLogin $recipientBankAccount $amount"
+        return "[$transactionCreateDate] $recipientLogin $amount"
     }
 }

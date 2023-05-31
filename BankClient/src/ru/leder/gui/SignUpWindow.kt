@@ -6,7 +6,7 @@ package ru.leder.gui
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.uiDesigner.core.Spacer
-import ru.leder.net.DTO.SignUpDTO
+import ru.leder.net.dto.SignUpDto
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.beans.PropertyChangeListener
@@ -18,9 +18,25 @@ import javax.swing.border.TitledBorder
 /**
  * @author User
  */
-class SignUpWindow(val callbackReceiver: (SignUpDTO) -> Unit) : JFrame() {
+class SignUpWindow(val callbackReceiver: (SignUpDto) -> Unit) : JFrame() {
     private fun okButtonHandler(e: ActionEvent) {
-        // TODO add your code here
+        val login = textField2?.text
+        val name = textField1?.text
+        val password = String(passwordField1!!.password)
+
+        if (login.isNullOrEmpty() || name.isNullOrEmpty() || password.isNullOrEmpty()) {
+            val errorWindow = ErrorWindow("Одно из полей не заполнено")
+            errorWindow.isVisible = true
+        }
+
+        val dto = SignUpDto(
+            name = name!!,
+            login = login!!,
+            password = password
+        )
+        callbackReceiver(dto)
+
+        this.dispose()
     }
 
     private fun cancelButtonHandler(e: ActionEvent) {

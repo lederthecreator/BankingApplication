@@ -1,8 +1,8 @@
-package ru.leder.net.DTO
+package ru.leder.net.dto
 
 import ru.leder.net.entities.BankAccountSimplified
 
-data class LoginDTO(
+data class LoginDto(
     val name: String,
     val bankAccountList: List<BankAccountSimplified>
 )

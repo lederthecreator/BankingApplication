@@ -1,9 +1,9 @@
 package ru.leder.net.services
 
 import com.google.gson.Gson
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import ru.leder.net.entities.BankAccount
+import ru.leder.net.entities.Transaction
 import ru.leder.net.operations.BankAccountOperations
 import ru.leder.net.operations.UserOperations
 import ru.leder.net.utils.Logger
@@ -15,83 +15,133 @@ class TransferService(private val logger: Logger) {
     fun execute (data: Any) : Boolean {
         val model = getData(data) ?: return false
 
-        return process(model)
+        when (model.type) {
+            "Withdraw" -> {
+                return  processWithdraw(model)
+            }
+
+            "Deposit" -> {
+                return processDeposit(model)
+            }
+
+            "Transfer" -> {
+                return processTransfer(model)
+            }
+        }
+
+        return false
     }
 
-    private fun getData(data: Any) : TransferModel? {
-        val jsonData = gson.toJson(data)
-        val mapData = Utils.getMapFromJson(jsonData)
-        var transferModel: TransferModel? = null
-
-        try {
-            val initiatorId = mapData["initiator"].toString().toInt()
-            val initiatorAccountNumber = mapData["initiatorBankAccount"].toString()
-            val recipientId = mapData["recipient"].toString().toInt()
-            val recipientAccountNumber = mapData["recipientBankAccount"].toString()
-            val amount = mapData["amount"].toString().toBigDecimal()
-
-            transferModel = TransferModel(
-                initiatorId, initiatorAccountNumber, recipientId, recipientAccountNumber, amount
-            )
-        } catch (ex: Throwable) {
-            logger.log("Cannot parse data, ex.message: ${ex.localizedMessage}")
+    private fun processTransfer(model: CacheModel): Boolean {
+        transaction {
+            model.initiator.balance -= model.amount
+            model.recipient!!.balance += model.amount
         }
-
-        return transferModel
-    }
-
-    private fun process(model: TransferModel) : Boolean {
-        val userInitiator = UserOperations.get(model.initiatorId)
-        if (userInitiator == null) {
-            logger.log("Cannot find initiator by id: ${model.initiatorId}")
-            return false
-        }
-
-        val initiatorBankAccounts = BankAccountOperations.getAllByUserQuery(userInitiator)
-        if (initiatorBankAccounts.isEmpty() || initiatorBankAccounts.find { it.number == model.initiatorAccountNumber } == null) {
-            logger.log("Cannot find bank account of user ${userInitiator.name} with number ${model.initiatorAccountNumber}")
-            return false
-        }
-        val initiatorBankAccount = initiatorBankAccounts.find { it.number == model.initiatorAccountNumber }!! // Если не нашел - return выше
-
-        if (model.amount < BigDecimal(0)) {
-            logger.log("Invalid amount (less than zero)")
-            return false
-        }
-
-        if (initiatorBankAccount.balance < model.amount) {
-            logger.log("Invalid operation. Bank account [${initiatorBankAccount.number}] dont have enough funds")
-            return false
-        }
-
-        val userRecipient = UserOperations.get(model.recipientId)
-        if (userRecipient == null) {
-            logger.log("Cannot find recipient by id ${model.recipientId}")
-            return false
-        }
-
-        val recipientBankAccounts = BankAccountOperations.getAllByUserQuery(userRecipient)
-        if (recipientBankAccounts.isEmpty() || recipientBankAccounts.find { it.number == model.recipientAccountNumber } == null) {
-            logger.log("Cannot find bank account of user ${userRecipient.name} with number ${model.recipientAccountNumber}")
-            return false
-        }
-        val recipientBankAccount = recipientBankAccounts.find { it.number == model.recipientAccountNumber }!! // Если не нашел - return выше
 
         transaction {
-            addLogger(StdOutSqlLogger)
-
-            initiatorBankAccount.balance -= model.amount
-            recipientBankAccount.balance += model.amount
+            Transaction.new {
+                // transactionCreateDate = LocalDateTime.now()
+                initiatorBankAccountId = model.initiator.id
+                recipientBankAccountId = model.recipient!!.id
+                amount = model.amount
+            }
         }
 
         return true
     }
 
-    private data class TransferModel(
-        val initiatorId: Int,
-        val initiatorAccountNumber: String,
-        val recipientId: Int,
-        val recipientAccountNumber: String,
-        val amount: BigDecimal
+    private fun processDeposit(model: CacheModel): Boolean {
+        transaction {
+            model.initiator.balance += model.amount
+        }
+
+        transaction {
+            Transaction.new {
+                // transactionCreateDate = LocalDateTime.now()
+                initiatorBankAccountId = model.initiator.id
+                recipientBankAccountId = model.initiator.id
+                amount = model.amount
+            }
+        }
+
+        return true
+    }
+
+    private fun processWithdraw(model: CacheModel): Boolean {
+        transaction {
+            model.initiator.balance -= model.amount
+        }
+
+        transaction {
+            Transaction.new {
+                // transactionCreateDate = LocalDateTime.now()
+                initiatorBankAccountId = model.initiator.id
+                recipientBankAccountId = model.initiator.id
+                amount = model.amount
+            }
+        }
+
+        return true
+    }
+
+    private fun getData(data: Any) : CacheModel? {
+        val jsonData = gson.toJson(data)
+        val mapData = Utils.getMapFromJson(jsonData)
+
+        try {
+            val initiatorId = mapData["initiator"].toString().toInt()
+            val initiatorAccountNumber = mapData["initiatorBankAccount"].toString()
+            val recipientLogin = mapData["recipient"].toString()
+            val recipientAccountNumber = mapData["recipientBankAccount"].toString()
+            val amount = mapData["amount"].toString().toBigDecimal()
+            val type = mapData["type"].toString()
+
+            val userInitiator = UserOperations.get(initiatorId)
+            val userRecipient = UserOperations.getByLogin(recipientLogin)
+
+            if (userInitiator == null) {
+                throw Exception("Cannot find initiator")
+            }
+
+            val initiatorBankAccount = BankAccountOperations.getByUserAndNumber(userInitiator, initiatorAccountNumber)
+            if (initiatorBankAccount == null) {
+                throw Exception("Cannot find initiator bank account")
+            }
+
+            var recipientBankAccount: BankAccount? = null
+
+            if (type == "Transfer") {
+                if (userRecipient == null) {
+                    throw Exception("Cannot find recipient")
+                }
+
+                recipientBankAccount = BankAccountOperations.getByUserAndNumber(userRecipient, recipientAccountNumber)
+                if (recipientBankAccount == null) {
+                    throw Exception("Cannot find recipient bank account")
+                }
+            } else {
+                recipientBankAccount = initiatorBankAccount
+            }
+
+            if (amount < BigDecimal(0)) {
+                throw Exception("Amount cannot be less than zero")
+            }
+
+            return CacheModel(
+                initiatorBankAccount, recipientBankAccount, amount, type
+            )
+
+        } catch (ex: Throwable) {
+            logger.log("Cannot parse data, ex.message: ${ex.localizedMessage}")
+        }
+
+        return null
+    }
+
+    private data class CacheModel(
+        val initiator: BankAccount,
+        val recipient: BankAccount?,
+        val amount: BigDecimal,
+        val type: String
     )
 }

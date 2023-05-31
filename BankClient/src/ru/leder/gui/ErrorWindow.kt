@@ -17,9 +17,9 @@ import javax.swing.border.TitledBorder
 /**
  * @author User
  */
-class ErrorWindow : JFrame() {
+class ErrorWindow(val errorMessage: String) : JFrame() {
     private fun okButtonHandler(e: ActionEvent) {
-        // TODO add your code here
+        this.isVisible = false
     }
 
     private fun initComponents() {
@@ -126,5 +126,6 @@ class ErrorWindow : JFrame() {
 
     init {
         initComponents()
+        textArea1?.text = errorMessage
     }
 }

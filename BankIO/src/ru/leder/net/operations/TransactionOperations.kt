@@ -2,6 +2,7 @@ package ru.leder.net.operations
 
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.leder.net.entities.Transactions
 import ru.leder.net.entities.Transaction as TransactionEntity
@@ -14,7 +15,7 @@ object TransactionOperations {
             addLogger(StdOutSqlLogger)
 
             transactionList = TransactionEntity.find {
-                Transactions.initiatorBankAccountId eq id
+                Transactions.initiatorBankAccountId eq id or (Transactions.recipientBankAccountId eq id)
             }.toList()
         }
 

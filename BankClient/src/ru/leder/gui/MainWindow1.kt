@@ -6,7 +6,7 @@ package ru.leder.gui
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.uiDesigner.core.Spacer
-import ru.leder.net.DTO.LoginDTO
+import ru.leder.net.dto.LoginDto
 import java.awt.Color
 import java.awt.Font
 import java.awt.Insets
@@ -20,7 +20,7 @@ import javax.swing.border.TitledBorder
  * @author User
  */
 class MainWindow1(val sendRequest: (String) -> Unit) : JFrame() {
-    fun loginDtoReceiver(dto: LoginDTO) {
+    fun loginDtoReceiver(dto: LoginDto) {
         textField6?.text = dto.name
 
         if (panel1 == null) {

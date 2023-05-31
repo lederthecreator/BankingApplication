@@ -30,7 +30,23 @@ object BankAccountOperations {
         return entity
     }
 
-    fun getAllQuery() : List<BankAccount> = BankAccount.all().sortedByDescending { it.id }
+    fun getById(entityId: Int) : BankAccount? {
+        var entity : BankAccount? = null
+        transaction {
+            entity = getAllQuery().firstOrNull { it.id.value == entityId }
+        }
+
+        return entity
+    }
+
+    fun getAllQuery() : List<BankAccount> {
+        var list: List<BankAccount> = mutableListOf<BankAccount>().toList()
+        transaction {
+            list = BankAccount.all().sortedByDescending { it.id }
+        }
+
+        return list
+    }
 
     fun getAllByUserQuery(user: User) : List<BankAccount> {
         var list: List<BankAccount> = mutableListOf<BankAccount>().toList()

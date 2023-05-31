@@ -14,6 +14,8 @@ object BankAccounts : IntIdTable() {
     val balance = decimal("balance", 10, 3)
 
     val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+
+    val productId = reference("product_id", Products.id, onDelete = ReferenceOption.SET_NULL).nullable()
 }
 
 class BankAccount(id: EntityID<Int>) : IntEntity(id) {
@@ -25,12 +27,14 @@ class BankAccount(id: EntityID<Int>) : IntEntity(id) {
 
     var userId by User referencedOn BankAccounts.userId
 
+    var productId by Product optionalReferencedOn  BankAccounts.productId
+
     override fun toString(): String {
         return "$number $balance ${userId.name}"
     }
 }
 
-data class BankAccountSimplified(val number: String, val balance: BigDecimal){
+data class BankAccountSimplified(val id: Int, val number: String, val balance: BigDecimal){
     override fun toString(): String {
         return "$number $balance"
     }

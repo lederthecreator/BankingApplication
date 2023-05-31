@@ -3,10 +3,14 @@ package ru.leder.net
 import com.google.gson.Gson
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.exposed.sql.transactions.transaction
+import ru.leder.net.dto.BankAccountDto
 import ru.leder.net.entities.BankAccountSimplified
+import ru.leder.net.entities.TransactionSimplified
 import ru.leder.net.entities.User
 import ru.leder.net.entities.UserSimplified
 import ru.leder.net.operations.BankAccountOperations
+import ru.leder.net.operations.TransactionOperations
 import ru.leder.net.operations.UserOperations
 import ru.leder.net.response.Response
 import ru.leder.net.services.LoginService
@@ -153,7 +157,9 @@ class ConnectedClient(
                 accountsList.forEach {
                     simpleAccountsList.add(
                         BankAccountSimplified(
-                            it.number, it.balance
+                            it.id.value,
+                            it.number,
+                            it.balance
                         )
                     )
                 }
@@ -194,6 +200,7 @@ class ConnectedClient(
                     return
                 }
                 val bankAccountSimplified = BankAccountSimplified(
+                    id = bankAccount.id.value,
                     number = bankAccount.number,
                     balance = bankAccount.balance
                 )
@@ -203,6 +210,42 @@ class ConnectedClient(
                     success = true,
                     operation = "CREATEBANKACCOUNT",
                     data = jsonBankAccountSimplified
+                )
+                val jsonResponse = gson.toJson(response)
+
+                communicator.sendData(jsonResponse)
+            }
+
+            "GETBANKACCOUNTSBYLOGIN" -> {
+                val requestData = request["data"]
+                val jsonData = gson.toJson(requestData)
+                val decodedData = Utils.getMapFromJson(jsonData)
+                val userLogin = decodedData["userLogin"].toString()
+
+                val user = UserOperations.getByLogin(userLogin)
+                if (user == null) {
+                    sendErrorResponse("GETBANKACCOUNTSBYLOGIN", "Cannot find user")
+                    return
+                }
+
+                val accountsList = BankAccountOperations.getAllByUserQuery(user)
+                val simpleAccountsList = mutableListOf<BankAccountSimplified>()
+                accountsList.forEach {
+                    simpleAccountsList.add(
+                        BankAccountSimplified(
+                            it.id.value,
+                            it.number,
+                            it.balance
+                        )
+                    )
+                }
+
+                val jsonList = gson.toJson(simpleAccountsList)
+
+                val response = Response(
+                    success = true,
+                    operation = "GETBANKACCOUNTSBYLOGIN",
+                    data = jsonList
                 )
                 val jsonResponse = gson.toJson(response)
 
@@ -247,6 +290,46 @@ class ConnectedClient(
                 communicator.sendData(jsonResponse)
             }
 
+            "GETBANKACCOUNT" -> {
+                if (loggedUser == null) {
+                    sendErrorResponse("GETBANKACCOUNT", "You are not logged in")
+                    return
+                }
+
+                val requestData = request["data"]
+                val jsonData = gson.toJson(requestData)
+                val decodedData = Utils.getMapFromJson(jsonData)
+                val bankAccountId = decodedData["id"].toString().toDouble().toInt()
+
+                val entity = BankAccountOperations.getById(bankAccountId)
+                if (entity == null) {
+                 sendErrorResponse("GETBANKACCOUNT", "Cannot find account with id: $bankAccountId")
+                 return
+                }
+
+                var dto: BankAccountDto? = null
+                transaction {
+                    dto = BankAccountDto (
+                        id = entity.id.value,
+                        number = entity.number,
+                        balance = entity.balance,
+                        type = entity.productId?.name.toString(),
+                        currency = entity.productId?.currency.toString(),
+                        duration = entity.productId?.duration.toString()
+                    )
+                }
+                val encodedDto = gson.toJson(dto)
+
+                val response = Response (
+                    operation = "GETBANKACCOUNT",
+                    success = true,
+                    data = encodedDto
+                )
+                val encodedResponse = gson.toJson(response)
+
+                communicator.sendData(encodedResponse)
+            }
+
             "TRANSFER" -> {
                 val transferService = TransferService(logger)
                 val transferData = request["data"]
@@ -275,6 +358,32 @@ class ConnectedClient(
 
                     communicator.sendData(jsonResponse)
                 }
+            }
+
+            "GETTRANSACTIONS" -> {
+                val requestData = request["data"]
+                val jsonData = gson.toJson(requestData)
+                val decodedData = Utils.getMapFromJson(jsonData)
+                val bankAccountId = decodedData["bankAccountId"].toString().toDouble().toInt()
+
+                val query = TransactionOperations.getByBankAccount(bankAccountId)
+                val simpleQuery = query.map {
+                    val recipient = BankAccountOperations.getById(it.recipientBankAccountId.value)
+
+                    transaction {
+                        TransactionSimplified (it.transactionCreateDate.toString(), recipient!!.userId.login, it.amount)
+                    }
+                }
+                val jsonQuery = gson.toJson(simpleQuery)
+
+                val response = Response(
+                    success = true,
+                    operation = "GETTRANSACTIONS",
+                    data = jsonQuery
+                )
+                val encodedResponse = gson.toJson(response)
+
+                communicator.sendData(encodedResponse)
             }
         }
     }
